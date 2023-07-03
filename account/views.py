@@ -4,10 +4,16 @@ from .forms import UserRegistrationForm, UserLoginForm
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 
 class UserRegisterView(View):
     form_class = UserRegistrationForm
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authentucated:
+            return redirect('home:home')
+        return super().dispatch(request, *args, **kwargs)
 
     def get(self, request):
         form = self.form_class()
@@ -26,6 +32,11 @@ class UserRegisterView(View):
 class UserLoginView(View):
     form_class = UserLoginForm
     templates_name = 'account/login.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authentucated:
+            return redirect('home:home')
+        return super().dispatch(request, *args, **kwargs)
 
 
     def get(self, request):
@@ -51,7 +62,7 @@ class UserLoginView(View):
 
 
 
-class UserLogoutView(View):
+class UserLogoutView(LoginRequiredMixin, View):
 
     def get(self, request):
         logout(request)
